@@ -6,6 +6,8 @@
 * @Last modified time: 15-Apr-172017
  */
 
+ const leaveTags = ['no2eu', 'notoeu', 'betteroffout', 'voteout', 'britainout', 'leaveeu', 'voteleave', 'beleave'];
+ const remainTags = ['bremain', 'yes2eu', 'yestoeu', 'betteroffin', 'votein', 'ukineu', 'strongerin', 'leadnotleave', 'voteremain'];
 
 
 var mymap = L.map('mapid').setView([51.505, -0.09], 7);
@@ -25,7 +27,7 @@ var stateStyle = {
 };
 
 $.getJSON("js/wmbound.geojson", function(data) {
-    console.log(data);
+
     data.features.forEach(function(cons) {
         var myLayer = L.geoJSON(cons, {
             style: stateStyle,
@@ -35,4 +37,45 @@ $.getJSON("js/wmbound.geojson", function(data) {
         });
         myLayer.addTo(mymap);
     });
+});
+
+L.control.scale().addTo(mymap);
+
+//custom size for this example, and autoresize because map style has a percentage width
+var remainmap = new L.WebGLHeatMap({gradientTexture:'http://localhost:8000/img/blue.png', autoresize: true});
+var leavemap = new L.WebGLHeatMap({gradientTexture:'http://localhost:8000/img/red.png', autoresize: true});
+
+
+
+
+$.getJSON("js/serverside/tweetlocations.json", function(data) {
+
+  var tweetStyle = {
+      "color": "grey",
+      "weight": 2,
+      "opacity": 0.65,
+      "fillOpacity": 0.5
+  };
+
+    data.forEach(function(tweet){
+      var lng = tweet.coordinates.coordinates[0];
+      var lat = tweet.coordinates.coordinates[1];
+      for(var i=0; i<tweet.entities.hashtags.length; i++){
+        //console.log(tweet.entities.hashtags[i]);
+        if(leaveTags.indexOf(tweet.entities.hashtags[i].text) > 0){
+
+          leavemap.addDataPoint(lat,lng,30);
+        }
+
+        if(remainTags.indexOf(tweet.entities.hashtags[i].text) > 0){
+          remainmap.addDataPoint(lat,lng,30);
+        }
+      };
+
+
+
+      //L.circle([lat,lng], 200, tweetStyle).addTo(mymap);
+    });
+    mymap.addLayer(remainmap);
+    mymap.addLayer(leavemap);
 });

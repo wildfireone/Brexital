@@ -3,11 +3,11 @@
 * @Date:   15-Apr-172017
 * @Filename: app.js
 * @Last modified by:   john
-* @Last modified time: 15-Apr-172017
+* @Last modified time: 16-Apr-172017
 */
 var jsonfile = require('jsonfile')
 
-var file = 'tweetlocations.json'
+var file = 'boris.json'
 
 
 var MongoClient = require('mongodb').MongoClient
@@ -30,10 +30,12 @@ var findDocuments = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('euref');
   // Find some documents
-  collection.find({"geo" : { "$ne" : null}}).toArray(function(err, docs) {
+  collection.find({"user.screen_name" : 'BorisJohnson'}).limit(2).toArray(function(err, docs) {
     assert.equal(err, null);
     console.log("Found the following records");
-    //console.log(docs);
+    console.log(docs);
+
+
     jsonfile.writeFileSync(file, docs)
     callback(docs);
   });
